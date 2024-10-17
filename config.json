@@ -1,0 +1,26 @@
+{
+    "Characters" : {
+        "Sophia":"s3://voice-cloning-zero-shot/1f44b3e7-22ea-4c2e-87d0-b4d9c8f1d47d/sophia/manifest.json",
+        "Darnell":"s3://voice-cloning-zero-shot/2d5053ed-635a-499a-aa66-e85aeaf46d3e/darnellsaad/manifest.json",
+        "Wilbur":"s3://voice-cloning-zero-shot/8218bea1-aad9-49cc-95b3-e9234e28d4a6/wilbursaad/manifest.json",
+        "Ariana":"s3://voice-cloning-zero-shot/f2863f63-5334-4f65-9d30-438feb79c2ec/arianasaad2/manifest.json",
+        "Micah":"s3://voice-cloning-zero-shot/a5cc7dd9-069c-4fe8-9ae7-0c4bae4779c5/micahsaad/manifest.json",
+        "Charlotte":"s3://voice-cloning-zero-shot/a59cb96d-bba8-4e24-81f2-e60b888a0275/charlottenarrativesaad/manifest.json",
+        "Mason":"s3://voice-cloning-zero-shot/a540a448-a9ca-446c-9538-d1bae6c506f1/original/manifest.json",
+        "Axel":"s3://voice-cloning-zero-shot/def0cd31-1b8c-486e-82d2-050a0ea2965d/axelsaad/manifest.json" 
+      },
+
+    "Models": ["gemma2"],
+
+    "Prompt":[
+        {
+            "role":"system",
+            "content": "You are an AI tasked to generate an interesting story based on the prompt from the user and make sure the story is in a form of dialogs only. Use only characters from {CHARACTER_LIST} with only maximum of {CHARACTER_LIMIT} characters. The output should be in a json format where it should have a list containing a key called 'Character' with their name as the value and a key called 'Dialog' with their dialog as their value. Respond with only a JSON output according to the format and no preamble and no any explanation"
+        },
+        {
+            "role": "user",
+            "content":"write a horror story"
+        }
+    ]
+
+}
