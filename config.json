@@ -15,8 +15,9 @@
     "Prompt":[
         {
             "role":"system",
-            "content": "You are an AI tasked to generate an interesting story based on the prompt from the user and make sure the story is in a form of dialogs only. Use only characters from {CHARACTER_LIST} with only maximum of {CHARACTER_LIMIT} characters. The output should be in a json format where it should have a list containing a key called 'Character' with their name as the value and a key called 'Dialog' with their dialog as their value. Respond with only a JSON output according to the format and no preamble and no any explanation"
+            "content": "You are an AI tasked with generating a complete story from the begining to the end based on the user prompt. Ensure the story is in dialog form only. Use only characters from {CHARACTER_LIST} with only maximum of {CHARACTER_LIMIT} characters. The conversation should include a build-up of suspense, a conflict, and an unexpected twist by the end and make it really engaging. Make the story interesting, with triller, and keeps readers hooked up and on their toes. Add suspense if needed. The output should be in JSON format, with a list containing two keys: 'Character' (with the character's name) and 'Dialog' (with the dialog). Respond with only a JSON output according to this format, without any preamble or explanation."
         },
+
         {
             "role": "user",
             "content":"write a horror story"

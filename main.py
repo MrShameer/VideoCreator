@@ -23,7 +23,7 @@ class VideoCreator():
 	def generateStory(self, story, max):
 		self.data['Prompt'][1]['content'] = story
 		self.data['Prompt'][0]['content'] = self.data['Prompt'][0]['content'].replace('CHARACTER_LIMIT', str(max))
-		response = ollama.chat(model=self.data['Models'][0], messages=self.data['Prompt'])
+		response = ollama.chat(model=self.data['Models'][0], messages=self.data['Prompt'], options={"temperature":0.5})
 		self.script = json.loads(response['message']['content'].replace('```json', '').replace('```', ''))
 		print(self.script)
 		return self.script
@@ -46,7 +46,7 @@ class VideoCreator():
 		video_path = f"RandomVideos/{random.choice(self.videoFiles)}"
 
 		command = [
-        'ffmpeg','-y','-i', video_path, '-i', audioPath,
+        'ffmpeg','-y', '-stream_loop', '-1', '-i', video_path, '-i', audioPath,
         '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0',
         '-shortest', f'FinalVideos/{num}-Video.mp4'
     	]
@@ -61,8 +61,17 @@ class VideoCreator():
 			self.createVideos(index, audio.name)
 
 videos = [
-	("Write a story where a long time friend decided to text a friend but has hidden agenda, and make it really engaging make the store in like a text message perspective. Make the story interesting, with triller, and keeps readers hooked up and on their toes. Add suspense if needed.", 2),
-	# ("write a happy story", 5)
+	# ("Write a story about a person who discovers a mysterious letter in their attic, leading them on a journey to uncover family secrets long buried.", 3)
+	("Create a story where an astronaut, stranded on a distant planet, begins receiving transmissions from a person claiming to be from Earth—but something feels off.", 2)
+	("Write about a group of strangers who are brought together by a peculiar event, only to realize their lives have been intertwined in ways they never expected.", 4)
+	# ("Imagine a story where an artist finds a paintbrush that brings their paintings to life, but each creation comes with unexpected consequences.", 3)
+	("Tell the story of a town where everyone mysteriously forgets the existence of one of its residents, except for one person who fights to prove they were real.", 6)
+	("Write about an inventor who creates a time machine, only to find out their future self has been trying to stop them from completing it for a crucial reason.", 2)
+	# ("Describe a world where people receive a single, cryptic message at birth, which they must decipher over the course of their lives to understand their purpose.", 3)
+	("Tell the story of two enemies forced to team up after discovering they share a long-lost sibling they never knew existed.", 2)
+	# ("Write about a seemingly ordinary librarian who uncovers an ancient book that allows them to manipulate reality—but at a steep price.", 5)
+	("Create a story about a group of friends who visit a remote village for a reunion, only to discover the village has been stuck in the same day for the past 50 years.",4)
+	("Write a story where a long time friend decided to text a friend but has hidden agenda.", 2),
 ]
 video = VideoCreator()
 video.create(videos)
