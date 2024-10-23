@@ -3,3 +3,4 @@ run.ps1
 .venv
 *.mp3
 *.mp4
+FinalScripts/*.json
