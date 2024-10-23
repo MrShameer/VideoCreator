@@ -1,13 +1,47 @@
 {
     "Characters" : {
-        "Sophia":"s3://voice-cloning-zero-shot/1f44b3e7-22ea-4c2e-87d0-b4d9c8f1d47d/sophia/manifest.json",
-        "Darnell":"s3://voice-cloning-zero-shot/2d5053ed-635a-499a-aa66-e85aeaf46d3e/darnellsaad/manifest.json",
-        "Wilbur":"s3://voice-cloning-zero-shot/8218bea1-aad9-49cc-95b3-e9234e28d4a6/wilbursaad/manifest.json",
-        "Ariana":"s3://voice-cloning-zero-shot/f2863f63-5334-4f65-9d30-438feb79c2ec/arianasaad2/manifest.json",
-        "Micah":"s3://voice-cloning-zero-shot/a5cc7dd9-069c-4fe8-9ae7-0c4bae4779c5/micahsaad/manifest.json",
-        "Charlotte":"s3://voice-cloning-zero-shot/a59cb96d-bba8-4e24-81f2-e60b888a0275/charlottenarrativesaad/manifest.json",
-        "Mason":"s3://voice-cloning-zero-shot/a540a448-a9ca-446c-9538-d1bae6c506f1/original/manifest.json",
-        "Axel":"s3://voice-cloning-zero-shot/def0cd31-1b8c-486e-82d2-050a0ea2965d/axelsaad/manifest.json" 
+        "Amir":{
+            "id": "s3://voice-cloning-zero-shot/37e5af8b-800a-4a76-8f31-4203315f8a9e/billysaad/manifest.json",
+            "accent": "american",
+            "age": null,
+            "gender": "male",
+            "loudness": null,
+            "style": "gaming",
+            "tempo": null,
+            "texture": null
+          },
+        "Arthur":{
+            "id": "s3://voice-cloning-zero-shot/d82d246c-148b-457f-9668-37b789520891/adolfosaad/manifest.json",
+            "accent": "american",
+            "age": "adult",
+            "gender": "male",
+            "loudness": "neutral",
+            "style": "narrative",
+            "tempo": "fast",
+            "texture": "thick"
+          },
+        "Ana": {
+            "id": "s3://voice-cloning-zero-shot/f3c22a65-87e8-441f-aea5-10a1c201e522/original/manifest.json",
+            "accent": "indian",
+            "age": null,
+            "gender": "female",
+            "loudness": null,
+            "style": null,
+            "tempo": null,
+            "texture": null
+          },
+
+          "Sam": {
+            "id": "s3://voice-cloning-zero-shot/2a7ddfc5-d16a-423a-9441-5b13290998b8/novasaad/manifest.json",
+            "accent": "american",
+            "age": "adult",
+            "gender": "female",
+            "loudness": "whisper",
+            "style": "narrative",
+            "tempo": "slow",
+            "texture": "smooth"
+          }
+
       },
 
     "Models": ["gemma2"],
@@ -15,7 +49,7 @@
     "Prompt":[
         {
             "role":"system",
-            "content": "You are an AI tasked with generating a complete story from the begining to the end based on the user prompt. Ensure the story is in dialog form only. Use only characters from {CHARACTER_LIST} with only maximum of {CHARACTER_LIMIT} characters. The conversation should include a build-up of suspense, a conflict, and an unexpected twist by the end and make it really engaging. Make the story interesting, with triller, and keeps readers hooked up and on their toes. Add suspense if needed. The output should be in JSON format, with a list containing two keys: 'Character' (with the character's name) and 'Dialog' (with the dialog). Respond with only a JSON output according to this format, without any preamble or explanation."
+            "content": "You are an AI tasked with generating a complete story, in dialog form only, that is suitable for a TikTok video. Ensure the story is in dialog form only, without any non-verbal actions, parentheticals, or descriptions like (whispering), (snort), or (singing). Focus solely on the characters' spoken lines. Use only characters from CHARACTER LIST: {CHARACTER_LIST}, with a maximum of {CHARACTER_LIMIT} characters. The CHARACTER LIST contain information about the characters voice and personality. Only use characters from the CHARACTER LIST. If the user prompt has different character names then just replace from the CHARACTER LIST. The conversation should be fast-paced, with short, punchy lines that build suspense quickly and include humor and local relatability. The story should begin with a hook in the first few seconds, include a build-up of suspense, a conflict, and an unexpected twist by the end. Incorporate trends like sustainability, health, or viral songs popular in Malaysia, while keeping the tone light, thrilling, and humorous. Ensure that the script is captivating for a TikTok audience and suitable for a video lasting between 15 seconds and 3 minutes. The output should be in JSON format, with a list containing two keys: 'Character' (with the character's name) and 'Dialog' (with the dialog). Respond with only a JSON output according to this format, without any preamble or explanation."
         },
 
         {

@@ -4,74 +4,99 @@ from pyht.client import TTSOptions
 import os, ollama, json, random, subprocess, shutil
 
 class VideoCreator():
-	def __init__(self) -> None:
-		if os.path.exists("Process"):
-			shutil.rmtree("Process")
-		os.makedirs(f"FinalVideos", exist_ok=True)
-		self.voiceClient = Client(
-			user_id=os.getenv("PLAY_HT_USER_ID"),
-			api_key=os.getenv("PLAY_HT_API_KEY"),
-			auto_connect=False
-		)
-		self.audioPath = ""
-		self.videoFiles = [f for f in os.listdir("RandomVideos") if f.endswith(('.mp4', '.avi', '.mov', '.mkv'))]
+    def __init__(self) -> None:
+        if os.path.exists("Process"):
+            shutil.rmtree("Process")
+        os.makedirs(f"FinalVideos", exist_ok=True)
+        self.voiceClient = Client(
+            user_id=os.getenv("PLAY_HT_USER_ID"),
+            api_key=os.getenv("PLAY_HT_API_KEY"),
+            auto_connect=False
+        )
+        self.audioPath = ""
+        self.videoFiles = [f for f in os.listdir("RandomVideos") if f.endswith(('.mp4', '.avi', '.mov', '.mkv'))]
 
-		with open('config.json', 'r') as file:
-			self.data = json.load(file)
-		self.data['Prompt'][0]['content'] = self.data['Prompt'][0]['content'].replace('CHARACTER_LIST', str(list(self.data['Characters'].keys())))
+        # Load configuration file
+        with open('config.json', 'r') as file:
+            self.data = json.load(file)
+        
+        # Prepare the character list
+        character_list = list(self.data['Characters'].keys())
+        
+        # Update the prompt template with characters and max character limit
+        self.data['Prompt'][0]['content'] = self.data['Prompt'][0]['content'].replace('{CHARACTER_LIST}', str(character_list))
+    
+    def generateStory(self, story, max_characters):
+        # Update the user prompt and system content
+        self.data['Prompt'][1]['content'] = story
+        self.data['Prompt'][0]['content'] = self.data['Prompt'][0]['content'].replace('{CHARACTER_LIMIT}', str(max_characters))
+        
+        # Make the request to Ollama with the prompt
+        response = ollama.chat(model=self.data['Models'][0], messages=self.data['Prompt'], options={"temperature": 0.5})
+        
+        # Check and print raw response to ensure correct output
+        print("Raw response:", response)
+        
+        try:
+            # Parse JSON response, clean any unwanted formatting
+            self.script = json.loads(response['message']['content'].replace('```json', '').replace('```', ''))
+            return self.script
+        except json.JSONDecodeError as e:
+            # Handle errors during JSON parsing
+            print(f"Error parsing JSON: {e}")
+            print("Raw message content:", response['message']['content'])  # For debugging
+            return None
+    
+    def createAudios(self, num, script):
+        os.makedirs(f"Process/{num}/Audios/", exist_ok=True)
+        combinedAudio = AudioSegment.empty()
+        for index, dialog in enumerate(script):
+            # Fetch the TTS options for the character
+            options = TTSOptions(voice=self.data['Characters'][dialog["Character"]]["id"])
+            audioPath = f"Process/{num}/Audios/{index}-{dialog['Character']}.mp3"
+            
+            # Create and save audio file for each dialog
+            with open(audioPath, "ab") as f:
+                for chunk in self.voiceClient.tts(dialog["Dialog"], options):
+                    f.write(chunk)
+            
+            audio_segment = AudioSegment.from_file(audioPath)
+            combinedAudio += audio_segment
+        
+        # Export final combined audio
+        return combinedAudio.export(f"Process/{num}/finalAudio.mp3", format="mp3")
+    
+    def createVideos(self, num, audioPath):
+        video_path = f"RandomVideos/{random.choice(self.videoFiles)}"
+        
+        # Create final video with audio overlay
+        command = [
+            'ffmpeg', '-y', '-stream_loop', '-1', '-i', video_path, '-i', audioPath,
+            '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0',
+            '-shortest', f'FinalVideos/{num}-Video.mp4'
+        ]
+        
+        subprocess.run(command, check=True)
+        print(f"Output: FinalVideos/{num}-Video.mp4")
+    
+    def create(self, stories):
+        for index, story in enumerate(stories):
+            print(f"Processing story {index+1}: {story}")
+            script = self.generateStory(*story)
+            if script:
+                print("Generated Script:", script)
+                # Uncomment the following lines once the script is properly generated
+                audio = self.createAudios(index, script)
+                self.createVideos(index, audio.name)
 
-	def generateStory(self, story, max):
-		self.data['Prompt'][1]['content'] = story
-		self.data['Prompt'][0]['content'] = self.data['Prompt'][0]['content'].replace('CHARACTER_LIMIT', str(max))
-		response = ollama.chat(model=self.data['Models'][0], messages=self.data['Prompt'], options={"temperature":0.5})
-		self.script = json.loads(response['message']['content'].replace('```json', '').replace('```', ''))
-		print(self.script)
-		return self.script
-
-	def createAudios(self, num, script):
-		os.makedirs(f"Process/{num}/Audios/", exist_ok=True)
-		combinedAudio = AudioSegment.empty()
-		for index, dialog in enumerate(script):
-			options = TTSOptions(voice=self.data['Characters'][dialog["Character"]])
-			audioPath = f"Process/{num}/Audios/{index}-{dialog["Character"]}.mp3"
-			with open(audioPath, "ab") as f:
-				for chunk in self.voiceClient.tts(dialog["Dialog"], options):
-					f.write(chunk)
-
-			audio_segment = AudioSegment.from_file(audioPath)
-			combinedAudio += audio_segment
-		return combinedAudio.export(f"Process/{num}/finalAudio.mp3", format="mp3")
-	
-	def createVideos(self, num, audioPath):
-		video_path = f"RandomVideos/{random.choice(self.videoFiles)}"
-
-		command = [
-        'ffmpeg','-y', '-stream_loop', '-1', '-i', video_path, '-i', audioPath,
-        '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0',
-        '-shortest', f'FinalVideos/{num}-Video.mp4'
-    	]
-
-		subprocess.run(command, check=True)
-		print("Output", f'FinalVideos/{num}-Video.mp4')
-
-	def create(self, stories):
-		for index, story in enumerate(stories):
-			print(story)
-			audio = self.createAudios(index, self.generateStory(*story))
-			self.createVideos(index, audio.name)
-
+# Example usage
 videos = [
-	# ("Write a story about a person who discovers a mysterious letter in their attic, leading them on a journey to uncover family secrets long buried.", 3)
-	("Create a story where an astronaut, stranded on a distant planet, begins receiving transmissions from a person claiming to be from Earth—but something feels off.", 2)
-	("Write about a group of strangers who are brought together by a peculiar event, only to realize their lives have been intertwined in ways they never expected.", 4)
-	# ("Imagine a story where an artist finds a paintbrush that brings their paintings to life, but each creation comes with unexpected consequences.", 3)
-	("Tell the story of a town where everyone mysteriously forgets the existence of one of its residents, except for one person who fights to prove they were real.", 6)
-	("Write about an inventor who creates a time machine, only to find out their future self has been trying to stop them from completing it for a crucial reason.", 2)
-	# ("Describe a world where people receive a single, cryptic message at birth, which they must decipher over the course of their lives to understand their purpose.", 3)
-	("Tell the story of two enemies forced to team up after discovering they share a long-lost sibling they never knew existed.", 2)
-	# ("Write about a seemingly ordinary librarian who uncovers an ancient book that allows them to manipulate reality—but at a steep price.", 5)
-	("Create a story about a group of friends who visit a remote village for a reunion, only to discover the village has been stuck in the same day for the past 50 years.",4)
-	("Write a story where a long time friend decided to text a friend but has hidden agenda.", 2),
+    (
+        # "Write a story for a TikTok video set in a busy urban environment. The story follows two characters who are best friends working at the same company. They are both up for a big promotion, but there is a secret: one of the character has discovered that other person might be sabotaging their chances. The story unfolds in a series of tense confrontations, starting with friendly banter and escalating into suspicion, betrayal, and an unexpected twist that changes everything. Use sharp, punchy dialogue to build suspense, with each character hiding something from the other. The twist should be both shocking and emotionally engaging, leaving the audience wanting more.", 2
+        "Write a story for a TikTok video featuring Amir, Ana, and Sam. Amir and Sam are secretly crushing on each other but are too shy to admit it. Ana, their mutual friend and notorious for trolling, notices the chemistry between them and decides to have some fun. The story starts with Amir and Sam awkwardly trying to spend time together, but Ana continuously interrupts, making sarcastic comments and setting up humorous dialogue to make them flustered. As the tension builds, Ana's trolling gets out of hand, and Amir and Sama give up on confront each other about their feelings in an dissapointed way. Add humor, drama, and an unexpected twist at the end that resolves the tension in a surprising and heartwarming way. Keep the dialogue brief and punchy for a TikTok video lasting about 1 minute.", 3
+    )
 ]
+
+# Create VideoCreator instance and start processing
 video = VideoCreator()
 video.create(videos)
