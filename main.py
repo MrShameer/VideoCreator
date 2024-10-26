@@ -27,7 +27,7 @@ class VideoCreator():
 	def generateStory(self, story, max_characters):
 		self.data['Prompt'][1]['content'] = story
 		self.data['Prompt'][0]['content'] = self.data['Prompt'][0]['content'].replace('{CHARACTER_LIMIT}', str(max_characters))
-		response = ollama.chat(model=self.data['Models'][0], messages=self.data['Prompt'], format='json', options={"temperature":0.5, "num_ctx":16384})
+		response = ollama.chat(model=self.data['Models'][0], messages=self.data['Prompt'], options={"temperature":0.5, "num_ctx":16384})
 		return json.loads(response['message']['content'].replace('```json', '').replace('```', ''))
 	
 	def createAudios(self, script):
@@ -69,6 +69,17 @@ class VideoCreator():
 			audio = self.createAudios(script)
 			self.createVideos(audio.name)
 
+	def createWithScript(self):
+		for index, filename in enumerate(os.listdir("./FinalScripts/")):
+			if filename.endswith(".json"):  # Check if the file is a JSON file
+				file_path = os.path.join("./FinalScripts/", filename)
+				with open(file_path, "r") as json_file:
+					self.uid = f"{index}-{str(uuid.uuid4())}"
+					script = json.load(json_file)
+					# print(data)
+					audio = self.createAudios(script)
+					self.createVideos(audio.name)
+
 
 videos = [
 	(
@@ -88,4 +99,5 @@ videos = [
 ]
 
 video = VideoCreator()
-video.create(videos)
+# video.create(videos)
+video.createWithScript()
